@@ -1,0 +1,10 @@
+#!/bin/sh
+
+go fmt ./...
+
+if [ $? = 0 ]; then 
+    git add ./\*.go
+    echo "Code formatted, commiting the changes..."
+else 
+    echo "Smth went wrong during code formatting"
+fi
