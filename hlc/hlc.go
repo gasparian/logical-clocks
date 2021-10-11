@@ -18,6 +18,13 @@ func New(systemTime, ticks int64) *Hybrid {
 	}
 }
 
+func NewNow(ticks int64) *Hybrid {
+	return &Hybrid{
+		Time:  time.Now().UnixNano() / 1000,
+		Ticks: ticks,
+	}
+}
+
 func (h *Hybrid) addTicks(ticks int64) {
 	h.Ticks += ticks
 }
@@ -69,8 +76,7 @@ func max(times ...*Hybrid) *Hybrid {
 func (h *Hybrid) Tick(requestTime *Hybrid) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	current := time.Now().UnixNano() / 1000
-	hybridNow := New(current, -1)
+	hybridNow := NewNow(-1)
 	latestTime := max(hybridNow, requestTime, h)
 	latestTime.addTicks(1)
 	h.Time = latestTime.Time
