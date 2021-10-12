@@ -62,16 +62,18 @@ func (v *Vector) Tick(requestTime *Vector) error {
 }
 
 func Compare(a, b *Vector) int {
-	equal, less := 0, 0
+	equal, less, greater := 0, 0, 0
 	for i := range a.Ticks {
 		if a.Ticks[i] == b.Ticks[i] {
 			equal++
 		} else if a.Ticks[i] < b.Ticks[i] {
 			less++
+		} else {
+			greater++
 		}
 	}
-	if len(a.Ticks) == equal {
-		return 0
+	if len(a.Ticks) == equal || (greater > 0 && less > 0 && greater == less) {
+		return 0 // == concurrent
 	}
 	if len(a.Ticks) == (equal + less) {
 		return -1

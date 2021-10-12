@@ -5,23 +5,27 @@ import (
 	"time"
 )
 
+func getWallTimeMs() int64 {
+	return time.Now().UnixNano() / 1e6
+}
+
 type Hybrid struct {
-	mu    sync.Mutex
-	Time  int64 // Usually time in ms
-	Ticks int64
+	mu              sync.RWMutex
+	WallClockTimeMs int64
+	Ticks           int64
 }
 
 func New(systemTime, ticks int64) *Hybrid {
 	return &Hybrid{
-		Time:  systemTime,
-		Ticks: ticks,
+		WallClockTimeMs: systemTime,
+		Ticks:           ticks,
 	}
 }
 
 func NewNow(ticks int64) *Hybrid {
 	return &Hybrid{
-		Time:  time.Now().UnixNano() / 1000,
-		Ticks: ticks,
+		WallClockTimeMs: getWallTimeMs(),
+		Ticks:           ticks,
 	}
 }
 
@@ -38,25 +42,26 @@ func (h *Hybrid) AddTicks(ticks int64) {
 func (h *Hybrid) Now() Hybrid {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	currentTime := time.Now().UnixNano() / 1000
-	if h.Time >= currentTime {
+	currentTime := getWallTimeMs()
+	// NOTE: check in case clock goes backwards fue to synchronization
+	if h.WallClockTimeMs >= currentTime {
 		h.addTicks(1)
 	} else {
-		h.Time = currentTime
+		h.WallClockTimeMs = currentTime
 		h.Ticks = 0
 	}
 	return Hybrid{
-		Time:  h.Time,
-		Ticks: h.Ticks,
+		WallClockTimeMs: h.WallClockTimeMs,
+		Ticks:           h.Ticks,
 	}
 }
 
 func Compare(a, b *Hybrid) int {
-	if (a.Time == b.Time) && (a.Ticks == b.Ticks) {
+	if (a.WallClockTimeMs == b.WallClockTimeMs) && (a.Ticks == b.Ticks) {
 		return 0
 	}
-	if (a.Time == b.Time && a.Ticks > b.Ticks) ||
-		(a.Time > b.Time) {
+	if (a.WallClockTimeMs == b.WallClockTimeMs && a.Ticks > b.Ticks) ||
+		(a.WallClockTimeMs > b.WallClockTimeMs) {
 		return 1
 	}
 	return -1
@@ -65,7 +70,7 @@ func Compare(a, b *Hybrid) int {
 func max(times ...*Hybrid) *Hybrid {
 	maxTime := times[0]
 	for _, time := range times {
-		cmp := Compare(maxTime, time)
+		cmp := Compare(time, maxTime)
 		if cmp == 1 {
 			maxTime = time
 		}
@@ -79,6 +84,12 @@ func (h *Hybrid) Tick(requestTime *Hybrid) {
 	hybridNow := NewNow(-1)
 	latestTime := max(hybridNow, requestTime, h)
 	latestTime.addTicks(1)
-	h.Time = latestTime.Time
+	h.WallClockTimeMs = latestTime.WallClockTimeMs
 	h.Ticks = latestTime.Ticks
+}
+
+func (h *Hybrid) GetCompactTimestampMs() int64 {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return (h.WallClockTimeMs >> 16 << 16) | (h.Ticks << 48 >> 48)
 }

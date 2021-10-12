@@ -17,6 +17,12 @@ func TestCompare(t *testing.T) {
 	if cmp < 1 {
 		t.Fatal("Original timestamp now must be higher than it's copy")
 	}
+	_, c1 := New(1, 3)
+	c1.AddTicks(1)
+	cmp = Compare(c, c1)
+	if cmp != 0 {
+		t.Fatalf("Timestamps must be concurrent: %v != %v", c, c1)
+	}
 }
 
 func TestConcurrentAdd(t *testing.T) {

@@ -11,3 +11,9 @@ To test the clocks implementations run `make test`.
 
 ### API  
 *TODO*  
+
+### References  
+ - [Lamport clock](https://lamport.azurewebsites.net/pubs/time-clocks.pdf)  
+ - [Vector clock](https://fileadmin.cs.lth.se/cs/Personal/Amr_Ergawy/dist-algos-papers/4.pdf)  
+ - [Hybrid logical clock](https://cse.buffalo.edu/tech-reports/2014-04.pdf)  
+ - [Martin Fowler blog](https://martinfowler.com/articles/patterns-of-distributed-systems/hybrid-clock.html)  

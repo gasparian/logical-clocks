@@ -1,9 +1,9 @@
 package hlc
 
 import (
-	"time"
-	// "sync"
+	"sync"
 	"testing"
+	"time"
 )
 
 func TestCompare(t *testing.T) {
@@ -26,37 +26,38 @@ func TestCompare(t *testing.T) {
 	}
 }
 
-// func TestConcurrentAdd(t *testing.T) {
-// 	lt := New("a", 0)
-// 	wg := sync.WaitGroup{}
-// 	wg.Add(10)
-// 	for i := 0; i < 10; i++ {
-// 		go func() {
-// 			defer wg.Done()
-// 			lt.AddTicks(1)
-// 		}()
-// 	}
-// 	wg.Wait()
-// 	now := lt.Now()
-// 	if now.Ticks < 10 {
-// 		t.Fatal("There must be exactly 10 ticks")
-// 	}
-// }
+func TestConcurrentAdd(t *testing.T) {
+	currentWallTime := getWallTimeMs()
+	c1 := New(currentWallTime, 0)
+	c2 := New(currentWallTime, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer wg.Done()
+			c1.AddTicks(1)
+		}()
+	}
+	wg.Wait()
+	cmp := Compare(c1, c2)
+	if cmp < 1 {
+		t.Fatal("Timestamp with more ticks must be greater")
+	}
+}
 
-// func TestConcurrentTick(t *testing.T) {
-// 	lt := New("a", 0)
-// 	req := New("b", 0)
-// 	wg := sync.WaitGroup{}
-// 	wg.Add(10)
-// 	for i := 0; i < 10; i++ {
-// 		go func() {
-// 			defer wg.Done()
-// 			lt.Tick(req)
-// 		}()
-// 	}
-// 	wg.Wait()
-// 	now := lt.Now()
-// 	if now.Ticks < 10 {
-// 		t.Fatal("There must be exactly 10 ticks")
-// 	}
-// }
+func TestConcurrentTick(t *testing.T) {
+	c := NewNow(0)
+	req := New(getWallTimeMs()+1000, 10)
+	wg := sync.WaitGroup{}
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer wg.Done()
+			c.Tick(req)
+		}()
+	}
+	wg.Wait()
+	if c.Ticks < 20 {
+		t.Fatal("There must be exactly 20 ticks")
+	}
+}
