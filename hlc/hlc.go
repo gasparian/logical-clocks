@@ -88,6 +88,8 @@ func (h *Hybrid) Tick(requestTime *Hybrid) {
 	h.Ticks = latestTime.Ticks
 }
 
+// NOTE: it was in an original paper, but times can go backwards
+//       at this case comparing to the "original" timestamp
 func (h *Hybrid) GetCompactTimestampMs() int64 {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
