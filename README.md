@@ -38,7 +38,7 @@ All clocks shares the same API:
   - `clock.Now() SomeClock` returns a copy of the current state of the clock;  
   - `clock.AddTicks(ticks int)` adds the specified number to the internal counter (thread-safe);  
   - `clock.Tick(requestTime *SomeClock)` moves clock forward, comparing to the incoming value;  
-  - `Compare(a, b *SomeClock)` compares the current states of two clocks, returns -1, 0 or 1;  
+  - `Compare(a, b *SomeClock)` compares the current states of two clocks, returns -1 ("happens before"), 0 ("concurrent") or 1;  
 
 ### References  
  - [Martin Fowler's blog](https://martinfowler.com/articles/patterns-of-distributed-systems/)  
