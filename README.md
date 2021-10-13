@@ -1,7 +1,7 @@
 ![main tests](https://github.com/gasparian/logical-clocks/actions/workflows/test.yml/badge.svg?branch=main)  
 
 # logical-clocks  
-In the distributed systems there is a problem of defining casual order of events. Usually you need that to implement MVCC or CRDTs. And you can't always rely only on physical clocks since it is very hard to achieve tight clocks synchronization in real world.  
+In the distributed systems there is a problem of defining causal order of events. Usually you need that to implement MVCC or CRDTs. And you can't always rely only on physical clocks since it is very hard to achieve tight clocks synchronization in real world.  
 But there is a very "elegant" solution to that: use logical clocks, where we can also rely on counting events occuring in the system.  
 So here you will find my naive go implementation of three basic logical clocks types: [Lamport clock](https://lamport.azurewebsites.net/pubs/time-clocks.pdf), [Vector clock](https://fileadmin.cs.lth.se/cs/Personal/Amr_Ergawy/dist-algos-papers/4.pdf) and [Hybrid logical clock](https://cse.buffalo.edu/tech-reports/2014-04.pdf).  
 
